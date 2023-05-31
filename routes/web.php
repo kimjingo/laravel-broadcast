@@ -1,9 +1,11 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
+use App\Models\Task;
 use Inertia\Inertia;
+use App\Events\TaskCreated;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +18,20 @@ use Inertia\Inertia;
 |
 */
 
+Route::get('/tasks', function () {
+    return Task::latest()->pluck('body');
+});
+Route::post('/tasks', function () {
+
+    $task = Task::forceCreate(request(['body']));
+
+    event(new TaskCreated($task));
+    
+});
+
+Route::get('/task-list', function () {
+    return Inertia::render('TaskList');
+});
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
